@@ -18,11 +18,18 @@ app.use(express.json());
 // app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://192.168.0.102:3001'); // обновите это с вашим доменом/оригином, который нуждается в доступе
+  const allowedOrigins = ['http://localhost:3001', 'https://your-frontend-app.herokuapp.com'];
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+     res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   next();
 });
+
 
 // Подключение к MongoDB
 mongoose.connect("mongodb+srv://nuradil:Qwerty11*@cluster0.smwjri5.mongodb.net/boilerValues?retryWrites=true&w=majority&appName=Cluster0", {
