@@ -18,7 +18,7 @@ app.use(express.json());
 // app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
-  const allowedOrigins = ['http://localhost:3001', 'https://mighty-caverns-86737-6af8502f2aff.herokuapp.com/'];
+  const allowedOrigins = ['http://localhost:3001', 'https://mighty-caverns-86737-6af8502f2aff.herokuapp.com'];
   const origin = req.headers.origin;
 
   if (allowedOrigins.includes(origin)) {
