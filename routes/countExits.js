@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const BoilerCountExits = require('../models/BoilerCountExits');
+const BoilerCountExits = require("../models/BoilerCountExits");
 
 // Получение всех цен
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const countExits = await BoilerCountExits.find();
     res.json(countExits);
@@ -13,23 +13,38 @@ router.get('/', async (req, res) => {
 });
 
 // Добавление новой цены
-router.post('/', async (req, res) => {
-    const { countExit, priceCountExit } = req.body;
+router.post("/", async (req, res) => {
+  const { countExit, priceCountExit } = req.body;
+  try {
+    if (!priceCountExit || !countExit) {
+      // Проверка на наличие поля price
+      return res.status(400).json({
+        message: "Поле priceCountExit и countExit обязательно для заполнения.",
+      });
+    }
 
-    if (!priceCountExit) { // Проверка на наличие поля price
-        return res.status(400).json({ message: 'Поле priceCountExit обязательно для заполнения.' });
-      }
-    
-  
     const newCountExit = new BoilerCountExits({ countExit, priceCountExit });
     await newCountExit.save();
     res.status(201).json(newCountExit);
-  });
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      // Если ошибка валидации, отправляем статус 400 с сообщением об ошибке
+      return res.status(400).json({ message: error.message });
+    } else {
+      // Для всех других ошибок отправляем статус 500 с обобщенным сообщением
+      return res.status(500).json({ message: "Внутренняя ошибка сервера" });
+    }
+  }
+});
 
 // Обновление цены
-router.patch('/:id', async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
-    const updatedCountExit = await BoilerCountExits.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedCountExit = await BoilerCountExits.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     res.json(updatedCountExit);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -37,7 +52,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // Удаление цены
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     await BoilerCountExits.findByIdAndDelete(req.params.id);
     res.status(204).send();
@@ -47,24 +62,26 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Редактирование существующей записи
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { countExit, priceCountExit } = req.body;
-    
-    try {
-      const updatedCountExit = await BoilerCountExits.findByIdAndUpdate(
-        req.params.id,
-        { countExit, priceCountExit },
-        { new: true }
-      );
-  
-      if (!updatedCountExit) {
-        return res.status(404).send({ message: 'Запись не найдена.' });
-      }
-  
-      res.send(updatedCountExit);
-    } catch (error) {
-      res.status(400).send({ message: 'Ошибка при обновлении записи.', error: error.message });
+
+  try {
+    const updatedCountExit = await BoilerCountExits.findByIdAndUpdate(
+      req.params.id,
+      { countExit, priceCountExit },
+      { new: true }
+    );
+
+    if (!updatedCountExit) {
+      return res.status(404).send({ message: "Запись не найдена." });
     }
-  });
+
+    res.send(updatedCountExit);
+  } catch (error) {
+    res
+      .status(400)
+      .send({ message: "Ошибка при обновлении записи.", error: error.message });
+  }
+});
 
 module.exports = router;

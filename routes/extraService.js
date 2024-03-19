@@ -3,7 +3,7 @@ const router = express.Router();
 const BoilerExtraService = require("../models/BoilerExtraService");
 
 // Получение всех цен
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const extraServices = await BoilerExtraService.find();
     res.json(extraServices);
@@ -13,23 +13,44 @@ router.get('/', async (req, res) => {
 });
 
 // Добавление новой цены
-router.post('/', async (req, res) => {
-    const { nameExtraService, priceExtraService } = req.body;
+router.post("/", async (req, res) => {
+  const { nameExtraService, priceExtraService } = req.body;
+  try {
+    if (!priceExtraService || !nameExtraService) {
+      // Проверка на наличие поля price
+      return res
+        .status(400)
+        .json({
+          message:
+            "Поле priceExtraService и nameExtraService обязательно для заполнения.",
+        });
+    }
 
-    if (!priceExtraService) { // Проверка на наличие поля price
-        return res.status(400).json({ message: 'Поле priceExtraService обязательно для заполнения.' });
-      }
-    
-  
-    const newExtraService = new BoilerExtraService({ nameExtraService, priceExtraService });
+    const newExtraService = new BoilerExtraService({
+      nameExtraService,
+      priceExtraService,
+    });
     await newExtraService.save();
     res.status(201).json(newExtraService);
-  });
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      // Если ошибка валидации, отправляем статус 400 с сообщением об ошибке
+      return res.status(400).json({ message: error.message });
+    } else {
+      // Для всех других ошибок отправляем статус 500 с обобщенным сообщением
+      return res.status(500).json({ message: "Внутренняя ошибка сервера" });
+    }
+  }
+});
 
 // Обновление цены
-router.patch('/:id', async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
-    const updatedExtraService = await BoilerExtraService.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedExtraService = await BoilerExtraService.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     res.json(updatedExtraService);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -37,7 +58,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // Удаление цены
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     await BoilerExtraService.findByIdAndDelete(req.params.id);
     res.status(204).send();
@@ -47,24 +68,26 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Редактирование существующей записи
-router.put('/:id', async (req, res) => {
-  const { nameExtraService, priceExtraService  } = req.body;
-    
-    try {
-      const updatedExtraService = await BoilerExtraService.findByIdAndUpdate(
-        req.params.id,
-        { nameExtraService, priceExtraService },
-        { new: true }
-      );
-  
-      if (!updatedExtraService) {
-        return res.status(404).send({ message: 'Запись не найдена.' });
-      }
-  
-      res.send(updatedExtraService);
-    } catch (error) {
-      res.status(400).send({ message: 'Ошибка при обновлении записи.', error: error.message });
+router.put("/:id", async (req, res) => {
+  const { nameExtraService, priceExtraService } = req.body;
+
+  try {
+    const updatedExtraService = await BoilerExtraService.findByIdAndUpdate(
+      req.params.id,
+      { nameExtraService, priceExtraService },
+      { new: true }
+    );
+
+    if (!updatedExtraService) {
+      return res.status(404).send({ message: "Запись не найдена." });
     }
-  });
+
+    res.send(updatedExtraService);
+  } catch (error) {
+    res
+      .status(400)
+      .send({ message: "Ошибка при обновлении записи.", error: error.message });
+  }
+});
 
 module.exports = router;
