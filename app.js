@@ -49,7 +49,7 @@ app.post('/api/send-email', (req, res) => {
 
   const mailOptions = {
     from: 'eplotorg63@mail.ru',
-    to: 'eplotorg63@mail.ru',
+    to: 'teplotorg63@mail.ru',
     subject: 'Новый заказ',
     text: `Поступил новый заказ. 
     Email клиента: ${email}, 
