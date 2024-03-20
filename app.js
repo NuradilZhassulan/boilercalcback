@@ -34,7 +34,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Endpoint для отправки электронных писем
-app.post('api/send-email', (req, res) => {
+app.post('/api/send-email', (req, res) => {
   const { email, phone, totalPrice, boilerType,
     boilerPower1,
     boilerPower2,
