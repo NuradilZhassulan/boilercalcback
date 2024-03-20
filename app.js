@@ -48,7 +48,7 @@ app.post('/api/send-email', (req, res) => {
     gasConsumption } = req.body;
 
   const mailOptions = {
-    from: 'eplotorg63@mail.ru',
+    from: 'nurik_22_11_96@mail.ru',
     to: 'teplotorg63@mail.ru',
     subject: 'Новый заказ',
     text: `Поступил новый заказ. 
