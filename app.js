@@ -57,6 +57,7 @@ app.post("/api/send-email", (req, res) => {
     contour,
     power,
     gasConsumption,
+    informationBlocksData,
   } = req.body;
 
   const mailOptions = {
@@ -77,7 +78,8 @@ app.post("/api/send-email", (req, res) => {
     доп. заказы: ${JSON.stringify(sendExtraServices)},
     характеристики: "Котел": ${contour},
     характеристики: "Мощность котельной кВт": ${power},
-    характеристики: "Расход газа природного м3/ч": ${gasConsumption}`,
+    характеристики: "Расход газа природного м3/ч": ${gasConsumption}
+    подобрали узел:  ${informationBlocksData}`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
