@@ -5,37 +5,48 @@ const valueRoutes = require("./routes/values");
 const priceRoutes = require("./routes/prices");
 const countExitRoutes = require("./routes/countExits");
 const extraServicesRoutes = require("./routes/extraService");
-const nodemailer = require('nodemailer');
+const systemDescriptionRoutes = require("./routes/systemDescription");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(express.json());
 
 app.use((req, res, next) => {
-  const allowedOrigins = ['http://localhost:3001', 'https://mighty-caverns-86737-6af8502f2aff.herokuapp.com'];
+  const allowedOrigins = [
+    "http://localhost:3001",
+    "https://mighty-caverns-86737-6af8502f2aff.herokuapp.com",
+  ];
   const origin = req.headers.origin;
 
   if (allowedOrigins.includes(origin)) {
-     res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader("Access-Control-Allow-Origin", origin);
   }
 
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   next();
 });
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.mail.ru',
+  host: "smtp.mail.ru",
   port: 465, // Обычно для SMTPS (SMTP over SSL) используется порт 465
   secure: true, // true для 465 порта, false для других портов
   auth: {
-    user: 'nurik_22_11_96@mail.ru',
-    pass: 'kzHuYEbLr6Ndj44a0Ykm',
+    user: "nurik_22_11_96@mail.ru",
+    pass: "kzHuYEbLr6Ndj44a0Ykm",
   },
 });
 
 // Endpoint для отправки электронных писем
-app.post('/api/send-email', (req, res) => {
-  const { email, phone, totalPrice, boilerType,
+app.post("/api/send-email", (req, res) => {
+  const {
+    email,
+    phone,
+    totalPrice,
+    boilerType,
     boilerPower1,
     boilerPower2,
     waterSource,
@@ -45,12 +56,13 @@ app.post('/api/send-email', (req, res) => {
     sendExtraServices,
     contour,
     power,
-    gasConsumption } = req.body;
+    gasConsumption,
+  } = req.body;
 
   const mailOptions = {
-    from: 'nurik_22_11_96@mail.ru',
-    to: 'teplotorg63@mail.ru',
-    subject: 'Новый заказ',
+    from: "nurik_22_11_96@mail.ru",
+    to: "teplotorg63@mail.ru",
+    subject: "Новый заказ",
     text: `Поступил новый заказ. 
     Email клиента: ${email}, 
     телефон: ${phone}, 
@@ -71,20 +83,22 @@ app.post('/api/send-email', (req, res) => {
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log(error);
-      res.status(500).send('Ошибка при отправке письма');
+      res.status(500).send("Ошибка при отправке письма");
     } else {
-      console.log('Email sent: ' + info.response);
-      res.status(200).send('Письмо успешно отправлено');
+      console.log("Email sent: " + info.response);
+      res.status(200).send("Письмо успешно отправлено");
     }
   });
 });
 
-
 // Подключение к MongoDB
-mongoose.connect("mongodb+srv://nuradil:Qwerty11*@cluster0.smwjri5.mongodb.net/boilerValues?retryWrites=true&w=majority&appName=Cluster0", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(
+  "mongodb+srv://nuradil:Qwerty11*@cluster0.smwjri5.mongodb.net/boilerValues?retryWrites=true&w=majority&appName=Cluster0",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 
 app.use("/api/values", valueRoutes);
 
@@ -93,6 +107,8 @@ app.use("/api/prices", priceRoutes);
 app.use("/api/countExit", countExitRoutes);
 
 app.use("/api/extraservices", extraServicesRoutes);
+
+app.use("/api/systemDescription", systemDescriptionRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
