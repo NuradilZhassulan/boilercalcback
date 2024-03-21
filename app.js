@@ -7,6 +7,7 @@ const countExitRoutes = require("./routes/countExits");
 const extraServicesRoutes = require("./routes/extraService");
 const systemDescriptionRoutes = require("./routes/systemDescription");
 const nodemailer = require("nodemailer");
+const axios = require("axios");
 
 const app = express();
 app.use(express.json());
@@ -40,6 +41,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const telegramToken = "6579764965:AAFcZBEC7p_Hj0pNXy3fzGvog8bm9_0ocJI"; 
+const chatId = "-4160008990"; // ID группы
+
 // Endpoint для отправки электронных писем
 app.post("/api/send-email", (req, res) => {
   const {
@@ -60,26 +64,42 @@ app.post("/api/send-email", (req, res) => {
     informationBlocksData,
   } = req.body;
 
+  const messageText = `Поступил новый заказ. 
+  Email клиента: ${email}, 
+  телефон: ${phone}, 
+  итоговая сумма: ${totalPrice}, 
+  комбинацию котлов: ${boilerType},
+  мощность котлов 1: ${boilerPower1},
+  мощность котлов 2: ${boilerPower2},
+  горячая вода: ${waterSource},
+  бойлер: ${waterVolume},
+  кол. потребителей тепла: ${selectedCount},
+  выбранные потребителей тепла: ${JSON.stringify(sendCheckedState)},
+  доп. заказы: ${JSON.stringify(sendExtraServices)},
+  характеристики: "Котел": ${contour},
+  характеристики: "Мощность котельной кВт": ${power},
+  характеристики: "Расход газа природного м3/ч": ${gasConsumption}
+  подобрали узел:  ${JSON.stringify(informationBlocksData)}`;
+
+  // Отправляем сообщение в Telegram
+  axios
+    .post(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+      chat_id: chatId,
+      text: messageText,
+    })
+    .then((response) => {
+      console.log("Сообщение отправлено в Telegram");
+    })
+    .catch((error) => {
+      console.error("Ошибка при отправке сообщения в Telegram:", error);
+    });
+
+  // Отправляем электронное письмо
   const mailOptions = {
     from: "nurik_22_11_96@mail.ru",
     to: "teplotorg63@mail.ru",
     subject: "Новый заказ",
-    text: `Поступил новый заказ. 
-    Email клиента: ${email}, 
-    телефон: ${phone}, 
-    итоговая сумма: ${totalPrice}, 
-    комбинацию котлов: ${boilerType},
-    мощность котлов 1: ${boilerPower1},
-    мощность котлов 2: ${boilerPower2},
-    горячая вода: ${waterSource},
-    бойлер: ${waterVolume},
-    кол. потребителей тепла: ${selectedCount},
-    выбранные потребителей тепла: ${JSON.stringify(sendCheckedState)},
-    доп. заказы: ${JSON.stringify(sendExtraServices)},
-    характеристики: "Котел": ${contour},
-    характеристики: "Мощность котельной кВт": ${power},
-    характеристики: "Расход газа природного м3/ч": ${gasConsumption}
-    подобрали узел:  ${informationBlocksData}`,
+    text: messageText,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
