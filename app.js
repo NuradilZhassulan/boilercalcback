@@ -41,7 +41,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const telegramToken = "6579764965:AAFcZBEC7p_Hj0pNXy3fzGvog8bm9_0ocJI"; 
+const telegramToken = "6579764965:AAFcZBEC7p_Hj0pNXy3fzGvog8bm9_0ocJI";
 const chatId = "-4160008990"; // ID группы
 
 // Endpoint для отправки электронных писем
@@ -64,22 +64,56 @@ app.post("/api/send-email", (req, res) => {
     informationBlocksData,
   } = req.body;
 
-  const messageText = `Поступил новый заказ. 
+  // Формируем список выбранных потребителей тепла
+  const selectedHeatersList = sendCheckedState
+    .map((item, index) => `${index + 1}. ${item}`)
+    .join("\n");
+
+  // Формируем список дополнительных заказов
+  const extraOrdersList = sendExtraServices
+    .map((item, index) => `${index + 1}. ${item}`)
+    .join("\n");
+
+  // Формируем описание подобранных узлов
+  const nodesDescription = informationBlocksData
+    .map((node, index) => {
+      return `${index + 1}. ${node.name}, тип узла: ${
+        node.selectNodeType
+      }, Сколько кВт тепла потребляет узел: ${
+        node.countHeatNode
+      }, Площадь обслуживаемого помещения: ${
+        node.areaOfServicedPremises
+      }, Узел: ${node.node}, Мощность узла кВт: ${
+        node.nodePower
+      }, Коэффициент проходного сечения Kvs: ${node.flowCoefficient}, Насос: ${
+        node.pump
+      }`;
+    })
+    .join(",\n");
+
+  const messageText = `
+  Поступил новый заказ. 
+
   Email клиента: ${email}, 
   телефон: ${phone}, 
   итоговая сумма: ${totalPrice}, 
+
   комбинацию котлов: ${boilerType},
   мощность котлов 1: ${boilerPower1},
   мощность котлов 2: ${boilerPower2},
   горячая вода: ${waterSource},
   бойлер: ${waterVolume},
   кол. потребителей тепла: ${selectedCount},
-  выбранные потребителей тепла: ${JSON.stringify(sendCheckedState)},
-  доп. заказы: ${JSON.stringify(sendExtraServices)},
+  выбранные потребители тепла:
+  ${selectedHeatersList},
+  дополнительные заказы:
+  ${extraOrdersList},
   характеристики: "Котел": ${contour},
   характеристики: "Мощность котельной кВт": ${power},
-  характеристики: "Расход газа природного м3/ч": ${gasConsumption}
-  подобрали узел:  ${JSON.stringify(informationBlocksData)}`;
+  характеристики: "Расход газа природного м3/ч": ${gasConsumption},
+  
+  подобрали узел:
+  ${nodesDescription}`;
 
   // Отправляем сообщение в Telegram
   axios
