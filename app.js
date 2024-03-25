@@ -16,6 +16,7 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:3001",
     "https://mighty-caverns-86737-6af8502f2aff.herokuapp.com",
+    "http://calc.teplotorg63.ru",
   ];
   const origin = req.headers.origin;
 
